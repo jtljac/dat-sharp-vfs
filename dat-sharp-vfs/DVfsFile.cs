@@ -51,6 +51,9 @@ public abstract class DVfsFile {
     /// <param name="buffer">The byte array to populate with the file</param>
     /// <param name="offset">The offset of the byte buffer from which to start writing to</param>
     /// <returns>The number of bytes written to the buffer</returns>
+    /// <exception cref="ArgumentException">
+    /// Thrown if the <paramref name="buffer"/> length + <paramref name="offset"/> is less than the <see cref="Size"/>
+    /// </exception>
     /// <exception cref="InvalidDVfsFileException">Thrown if the file is not valid</exception>
     public abstract int GetFileContent(in byte[] buffer, int offset);
 
@@ -60,11 +63,4 @@ public abstract class DVfsFile {
     /// <returns>A stream for accessing the file</returns>
     /// <exception cref="InvalidDVfsFileException">Thrown if the file is not valid</exception>
     public abstract Stream GetFileStream();
-
-    /// <summary>
-    /// Get a handle to the file via a MemoryMappedFile
-    /// </summary>
-    /// <returns>A Memory Mapped File for accessing the file</returns>
-    /// <exception cref="InvalidDVfsFileException">Thrown if the file is not valid</exception>
-    public abstract MemoryMappedFile GetMemoryMappedFile();
 }

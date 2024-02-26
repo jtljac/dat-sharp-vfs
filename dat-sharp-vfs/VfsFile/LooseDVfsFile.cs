@@ -24,10 +24,13 @@ public class LooseDVfsFile(string filePath) : DVfsFile {
     public override bool IsValid => File.Exists(filePath);
 
     public override int GetFileContent(in byte[] buffer, int offset) {
+        var fileSize = Size;
+        if (buffer.Length + offset < fileSize)
+            throw new ArgumentException("Buffer does not have enough space for file contents", nameof(buffer));
         try {
             if (IsValid) {
                 using var file = File.OpenRead(filePath);
-                return file.Read(buffer, offset, (int) Size);
+                return file.Read(buffer, offset, (int) fileSize);
             }
         }
         catch {
@@ -48,7 +51,14 @@ public class LooseDVfsFile(string filePath) : DVfsFile {
         throw new InvalidDVfsFileException();
     }
 
-    public override MemoryMappedFile GetMemoryMappedFile() {
+    /// <summary>
+    /// Get a handle to the file via a MemoryMappedFile
+    /// <para/>
+    ///
+    /// </summary>
+    /// <returns>A Memory Mapped File for accessing the file</returns>
+    /// <exception cref="InvalidDVfsFileException">Thrown if the file is not valid</exception>
+    public MemoryMappedFile GetMemoryMappedFile() {
         try {
             if (IsValid) return MemoryMappedFile.CreateFromFile(filePath);
         }

@@ -739,6 +739,7 @@ public class TestVfs {
         List<string> files = ["test/test", "test2", "test2/test3"];
         var inserter = new MockDVfsFileInserter(files);
         Assert.Equal(3, vfs.MountFiles(filePath, inserter));
+
         foreach (var file in files) {
             vfs.FileExists(file);
         }
@@ -837,10 +838,6 @@ internal class MockDVfsFile(long size = 0, bool valid = true) : DVfsFile {
     }
 
     public override Stream GetFileStream() {
-        throw new NotImplementedException();
-    }
-
-    public override MemoryMappedFile GetMemoryMappedFile() {
         throw new NotImplementedException();
     }
 }
