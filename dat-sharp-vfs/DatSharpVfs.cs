@@ -85,24 +85,29 @@ public class DatSharpVfs {
     /// </summary>
     /// <param name="path">The path to mount the file to</param>
     /// <param name="file">The DVfsFile to mount</param>
+    /// <param name="overwrite">If true then if there is already a file at the path, overwrite it</param>
     /// <param name="createFolders">If true, recursively create directories in the path that don't exist</param>
     /// <exception cref="ArgumentException">Thrown when the filename or path is empty</exception>
-    /// <exception cref="FileExistsException">Thrown if there is already a file mounted at the path</exception>
+    /// <exception cref="FileExistsException">
+    /// Thrown if there is already a file mounted at the path and <paramref name="overwrite"/> is false
+    /// </exception>
     /// <exception cref="DirectoryNotFoundException">
     /// Thrown when createFolders is false and the path contains a directory that doesn't exist
     /// </exception>
-    public void MountFile(string path, DVfsFile file, bool createFolders = false) {
+    public void MountFile(string path, DVfsFile file, bool overwrite = true, bool createFolders = false) {
         if (path.EndsWith('/')) throw new ArgumentException("Filename cannot be empty", nameof(path));
         MountFile(StringToPath(path), file, createFolders);
     }
 
     /// <inheritdoc cref="MountFile"/>
-    private void MountFile(Span<string> path, DVfsFile file, bool createFolders) {
+    private void MountFile(Span<string> path, DVfsFile file, bool overwrite = true, bool createFolders = false) {
         if (path.IsEmpty) throw new ArgumentException("Path cannot be empty", nameof(path));
+        
         if (path.Length == 1) {
-            // If already exists then return the existing directory.
-            // This mimics the behaviour of C#'s Directory#CreateDirectory
-            if (_files.ContainsKey(path[0])) throw new FileExistsException();
+            if (_files.ContainsKey(path[0])) {
+                if (overwrite) UnmountFile(path[0]);
+                else throw new FileExistsException();
+            }
 
             _files[path[0]] = file;
             file.IncrementReferences();
@@ -124,6 +129,7 @@ public class DatSharpVfs {
     /// </summary>
     /// <param name="basePath">A path to the base directory to start mounting the files at</param>
     /// <param name="inserter">An inserter that defines which files to insert</param>
+    /// <param name="overwrite">If true then if a file's path points an existing file, it will overwrite it</param>
     /// <param name="createFolders">
     /// If true, recursively create directories in the path that don't exist. Applies to both the base path and paths
     /// from the inserter
@@ -132,12 +138,12 @@ public class DatSharpVfs {
     /// <exception cref="DirectoryNotFoundException">
     /// Thrown when the basePath contains a directory that doesn't exist
     /// </exception>
-    public int MountFiles(string basePath, IVfsFileInserter inserter, bool createFolders = true) {
-        return MountFiles(StringToPath(basePath), inserter, createFolders);
+    public int MountFiles(string basePath, IVfsFileInserter inserter, bool overwrite = false, bool createFolders = true) {
+        return MountFiles(StringToPath(basePath), inserter, overwrite, createFolders);
     }
 
     /// <inheritdoc cref="MountFiles"/>
-    private int MountFiles(Span<string> basePath, IVfsFileInserter inserter, bool createFolders = true) {
+    private int MountFiles(Span<string> basePath, IVfsFileInserter inserter, bool overwrite = false, bool createFolders = true) {
         if (!basePath.IsEmpty) {
             if (_directories.TryGetValue(basePath[0], out var nextDir)) return nextDir.MountFiles(basePath[1..], inserter, createFolders);
 
@@ -150,7 +156,7 @@ public class DatSharpVfs {
 
         foreach (var (path, file) in inserter.GetFiles()) {
             try {
-                MountFile(StringToPath(path), file, createFolders);
+                MountFile(StringToPath(path), file, overwrite, createFolders);
                 ++counter;
             }
             catch (ArgumentException) {
