@@ -9,7 +9,7 @@ namespace dat_sharp_vfs.FileInserter;
 public class LooseFileDVfsFileInserter(string dirPath, bool recursive) : IVfsFileInserter{
     private IEnumerable<Tuple<string, DVfsFile>> GetFiles(string path) {
         // Bare with, this one's cheeky
-        // Iterate through all the folders in this file
+        // Iterate through all the files in this folder
         foreach (var file in Directory.GetFiles(path)) {
             yield return new Tuple<string, DVfsFile>(Path.GetRelativePath(dirPath, file), new LooseDVfsFile(file));
         }
@@ -17,7 +17,7 @@ public class LooseFileDVfsFileInserter(string dirPath, bool recursive) : IVfsFil
         if (!recursive) yield break;
 
         // Iterate through all the directories, then yield on each yield from recursion
-        foreach (var directory in Directory.GetDirectories(dirPath)) {
+        foreach (var directory in Directory.GetDirectories(path)) {
             foreach (var tuple in GetFiles(directory)) {
                 yield return tuple;
             }

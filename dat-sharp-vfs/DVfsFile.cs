@@ -17,7 +17,7 @@ public abstract class DVfsFile {
     /// This should be used whenever a the file is added to the VFS
     /// </summary>
     /// <returns>The new number of references</returns>
-    public byte IncrementReferences() {
+    internal byte IncrementReferences() {
         return ++References;
     }
 
@@ -27,7 +27,7 @@ public abstract class DVfsFile {
     /// This should be used whenever a the file is removed from the VFS
     /// </summary>
     /// <returns>The new number of references</returns>
-    public byte DecrementReferences() {
+    internal byte DecrementReferences() {
         return --References;
     }
 
