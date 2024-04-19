@@ -9,7 +9,7 @@ namespace dat_sharp_vfs;
 public abstract class DVfsFile {
     /// <summary>The number of references to this file in the VFS</summary>
     /// <remarks>This is used to enable multiple links to a file in the VFS</remarks>
-    public byte References { get; private set; }
+    public byte references { get; private set; }
 
     /// <summary>
     /// Increment the number of references to this file
@@ -18,7 +18,7 @@ public abstract class DVfsFile {
     /// </summary>
     /// <returns>The new number of references</returns>
     internal byte IncrementReferences() {
-        return ++References;
+        return ++references;
     }
 
     /// <summary>
@@ -28,7 +28,7 @@ public abstract class DVfsFile {
     /// </summary>
     /// <returns>The new number of references</returns>
     internal byte DecrementReferences() {
-        return --References;
+        return --references;
     }
 
     /// <summary>
