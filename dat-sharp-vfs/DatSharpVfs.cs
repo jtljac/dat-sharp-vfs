@@ -121,7 +121,7 @@ public class DatSharpVfs {
 
         if (!createFolders) throw new DirectoryNotFoundException("Failed to find Directory");
         (_directories[path[0]] = new DatSharpVfs(this))
-            .MountFile(path[1..], file, createFolders);
+            .MountFile(path[1..], file, overwrite, createFolders);
     }
 
     /// <summary>
